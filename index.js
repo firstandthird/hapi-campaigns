@@ -32,7 +32,12 @@ const register = async function(server, options) {
       campaigns.push({ name, type, timestamp: now });
     }
 
-    h.state(settings.cookieName, prepareCookie(campaigns));
+    h.state(settings.cookieName, prepareCookie(campaigns), {
+      ttl: settings.ttl,
+      path: '/',
+      clearInvalid: true,
+      ignoreErrors: true
+    });
 
     return h.continue;
   });
