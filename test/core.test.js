@@ -41,7 +41,7 @@ lab.experiment('campaigns', async() => {
       }
     });
 
-    const { res, payload } = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns=testname|value|${Date.now()}` } });
+    const { payload } = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns=testname|value|${Date.now()}` } });
     const cookie = payload.cookie;
     code.expect(cookie.length).to.equal(1);
     code.expect(cookie[0].name).to.equal('testname');

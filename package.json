@@ -21,6 +21,9 @@
     "extends": "firstandthird",
     "rules": {
       "no-underscore-dangle": 0
+    },
+    "parserOptions": {
+      "ecmaVersion": 2017
     }
   },
   "devDependencies": {

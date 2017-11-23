@@ -42,7 +42,7 @@ const register = async function(server, options) {
     const cutoff = now - settings.ttl;
     const currentCookie = this.state[settings.cookieName] || '';
     return parseCookie(currentCookie).filter(c => c.timestamp >= cutoff);
-  }
+  };
 
   server.decorate('request', 'getCampaigns', getCampaigns);
 };
