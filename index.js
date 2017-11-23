@@ -22,7 +22,7 @@ const register = async function(server, options) {
 
     const now = Date.now();
     const cutoff = now - settings.ttl;
-    const currentCookie = request.state[options.cookieName] || '';
+    const currentCookie = request.state[settings.cookieName] || '';
     const campaigns = parseCookie(currentCookie).filter(c => c.timestamp >= cutoff);
     const existing = campaigns.findIndex(c => (c.name === name && c.type === type));
 
