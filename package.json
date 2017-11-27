@@ -1,0 +1,44 @@
+{
+  "name": "hapi-campaigns",
+  "version": "1.0.0",
+  "description": "campaign tracking",
+  "main": "index.js",
+  "engine": {
+    "node": ">=8.8.0"
+  },
+  "scripts": {
+    "test": "lab --leaks -e test -c "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/firstandthird/hapi-campaigns.git"
+  },
+  "keywords": [
+    "hapi",
+    "campaign"
+  ],
+  "eslintConfig": {
+    "extends": "firstandthird",
+    "rules": {
+      "no-underscore-dangle": 0
+    },
+    "parserOptions": {
+      "ecmaVersion": 2017
+    }
+  },
+  "devDependencies": {
+    "code": "^5.1.2",
+    "eslint": "^4.11.0",
+    "eslint-config-firstandthird": "^4.0.1",
+    "eslint-plugin-import": "^2.6.1",
+    "hapi": "^17.0.2",
+    "lab": "^15.1.2",
+    "wreck": "^14.0.2"
+  },
+  "author": "First+Third",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/firstandthird/hapi-campaigns/issues"
+  },
+  "homepage": "https://github.com/firstandthird/hapi-campaigns#readme"
+}
