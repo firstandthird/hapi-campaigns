@@ -138,4 +138,19 @@ lab.experiment('campaigns', async() => {
     const result = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns=testname|visit|${Date.now()}/campaigns=testname2|visit|${expired}` } });
     code.expect(result.payload.cookie.length).to.equal(1);
   });
+
+  lab.test('handles utm campaigns', async() => {
+    server.route({
+      path: '/somecampaign',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const { res } = await wreck.get('http://localhost:8000/somecampaign?utm_campaign=testname&utm_medium=blavatsky', { json: 'force' });
+    let cookie = res.headers['set-cookie'] || [];
+    code.expect(cookie.length).to.equal(1);
+    code.expect(cookie[0]).to.include('testname');
+    code.expect(cookie[0]).to.include('blavatsky');
+  });
 });
