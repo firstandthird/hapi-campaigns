@@ -6,19 +6,37 @@ const defaults = {
   ttl: 30 * 86400000 // 30 days
 };
 
-const register = async function(server, options) {
+const register = function(server, options) {
   const settings = Object.assign({}, options, defaults);
 
-  server.ext('onPreResponse', async (request, h) => {
-    if (!request.query.campaign) {
-      return h.continue;
-    }
-
+  const parseCampaign = (request) => {
     const [name, type] = request.query.campaign.split('_');
 
     if (!name || !type) {
+      return false;
+    }
+    return { name, type };
+  };
+
+  const parseUTM = (request) => {
+    const name = request.query.utm_campaign;
+    const type = request.query.utm_source;
+    return { name, type };
+  };
+
+  server.ext('onPreResponse', (request, h) => {
+    let res;
+    if (request.query.campaign) {
+      res = parseCampaign(request);
+    }
+    if (request.query.utm_campaign && request.query.utm_source) {
+      res = parseUTM(request);
+    }
+    if (!res) {
       return h.continue;
     }
+    const name = res.name;
+    const type = res.type;
 
     const now = Date.now();
     const cutoff = now - settings.ttl;
@@ -38,7 +56,6 @@ const register = async function(server, options) {
       clearInvalid: true,
       ignoreErrors: true
     });
-
     return h.continue;
   });
 
