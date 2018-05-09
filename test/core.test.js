@@ -169,4 +169,19 @@ lab.experiment('campaigns', async() => {
     code.expect(cookie[0]).to.include('testname');
     code.expect(cookie[0]).to.include('visit');
   });
+
+  lab.test('concats utm_medium with utm_source', async() => {
+    server.route({
+      path: '/somecampaign',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const { res } = await wreck.get('http://localhost:8000/somecampaign?utm_campaign=testname&utm_source=visit&utm_medium=video', { json: 'force' });
+    let cookie = res.headers['set-cookie'] || [];
+    code.expect(cookie.length).to.equal(1);
+    code.expect(cookie[0]).to.include('testname');
+    code.expect(cookie[0]).to.include('visit_video');
+  });
 });
