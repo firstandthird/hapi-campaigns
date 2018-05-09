@@ -10,12 +10,17 @@ const register = function(server, options) {
   const settings = Object.assign({}, options, defaults);
 
   const parseCampaign = (request) => {
-    const [type, name] = request.query.campaign.split('_');
-
-    if (!name || !type) {
-      return false;
+    let name = false;
+    let type = '';
+    if (request.query.campaign.startsWith('_')) {
+      name = request.query.campaign.split('_')[0];
+    } else if (request.query.campaign.indexOf('_') === -1) {
+      name = request.query.campaign;
+    } else {
+      [type, name] = request.query.campaign.split('_');
     }
-    return { name, type };
+    // if there was no campaign name, then type was the name:
+    return name ? { name, type } : false;
   };
 
   const parseUTM = (request) => {
@@ -55,6 +60,7 @@ const register = function(server, options) {
       clearInvalid: true,
       ignoreErrors: true
     });
+
     return h.continue;
   });
 
