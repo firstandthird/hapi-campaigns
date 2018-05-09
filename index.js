@@ -10,7 +10,7 @@ const register = function(server, options) {
   const settings = Object.assign({}, options, defaults);
 
   const parseCampaign = (request) => {
-    const [name, type] = request.query.campaign.split('_');
+    const [type, name] = request.query.campaign.split('_');
 
     if (!name || !type) {
       return false;
@@ -49,7 +49,6 @@ const register = function(server, options) {
     } else {
       campaigns.push({ name, type, timestamp: now });
     }
-
     h.state(settings.cookieName, prepareCookie(campaigns), {
       ttl: settings.ttl,
       path: '/',
