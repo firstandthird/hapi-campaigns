@@ -194,4 +194,21 @@ lab.experiment('campaigns', async() => {
     code.expect(cookie[0]).to.include('testname');
     code.expect(cookie[0]).to.include('visit_video');
   });
+
+  lab.test('emits campaign event when campaign is fetched', async() => {
+    let called = false;
+    server.events.on('campaign', (data) => {
+      called = data.campaign;
+    });
+    server.route({
+      path: '/somecampaign2',
+      method: 'get',
+      handler(request, h) {
+        return { cookie: request.getCampaigns() };
+      }
+    });
+    await wreck.get('http://localhost:8000/somecampaign2?campaign=visit_testname', { json: 'force' });
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    code.expect(called.name).to.equal('testname');
+  });
 });

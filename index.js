@@ -8,7 +8,7 @@ const defaults = {
 
 const register = function(server, options) {
   const settings = Object.assign({}, options, defaults);
-
+  server.event('campaign');
   const parseCampaign = (request) => {
     let name = false;
     let type = '';
@@ -29,7 +29,7 @@ const register = function(server, options) {
     return { name, type };
   };
 
-  server.ext('onPreResponse', (request, h) => {
+  server.ext('onPreResponse', async (request, h) => {
     let res;
     if (request.query.campaign) {
       res = parseCampaign(request);
@@ -42,7 +42,7 @@ const register = function(server, options) {
     }
     const name = res.name;
     const type = res.type;
-
+    await server.events.emit('campaign', { request, campaign: { name, type } });
     const now = Date.now();
     const cutoff = now - settings.ttl;
     const currentCookie = request.state[settings.cookieName] || '';
