@@ -20,7 +20,7 @@ const register = function(server, options) {
 
   const parseUTM = (request) => {
     const name = request.query.utm_campaign;
-    const type = request.query.utm_source;
+    const type = request.query.utm_medium ? `${request.query.utm_source}_${request.query.utm_medium}` : request.query.utm_source;
     return { name, type };
   };
 
