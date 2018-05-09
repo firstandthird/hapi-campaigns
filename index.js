@@ -19,7 +19,6 @@ const register = function(server, options) {
     } else {
       [type, name] = request.query.campaign.split('_');
     }
-    // if there was no campaign name, then type was the name:
     return name ? { name, type } : false;
   };
 
