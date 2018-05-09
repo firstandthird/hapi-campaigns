@@ -128,7 +128,7 @@ lab.experiment('campaigns', async() => {
         return { cookie: request.getCampaigns() };
       }
     });
-    const result1 = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_test%2fname1', { json: 'force' });
+    const result1 = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_test/name1', { json: 'force' });
     const result2 = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_test|name2', { json: 'force' });
     const cookie1 = result1.res.headers['set-cookie'][0];
     const cookie2 = result2.res.headers['set-cookie'][0];
