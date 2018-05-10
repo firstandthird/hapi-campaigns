@@ -12,9 +12,7 @@ const register = function(server, options) {
   const parseCampaign = (request) => {
     let name = false;
     let type = '';
-    if (request.query.campaign.startsWith('_')) {
-      name = request.query.campaign.split('_')[0];
-    } else if (request.query.campaign.indexOf('_') === -1) {
+    if (request.query.campaign.indexOf('_') === -1) {
       name = request.query.campaign;
     } else {
       [type, name] = request.query.campaign.split('_');
@@ -41,18 +39,17 @@ const register = function(server, options) {
     }
     const name = res.name;
     const type = res.type;
-    await server.events.emit('campaign', { request, campaign: { name, type } });
     const now = Date.now();
     const cutoff = now - settings.ttl;
     const currentCookie = request.state[settings.cookieName] || '';
     const campaigns = parseCookie(currentCookie).filter(c => c.timestamp >= cutoff);
     const existing = campaigns.findIndex(c => (c.name === name && c.type === type));
-
     if (existing !== -1) {
       campaigns[existing].timestamp = now;
     } else {
       campaigns.push({ name, type, timestamp: now });
     }
+    await server.events.emit('campaign', { request, campaigns, campaign: { name, type } });
     h.state(settings.cookieName, prepareCookie(campaigns), {
       ttl: settings.ttl,
       path: '/',

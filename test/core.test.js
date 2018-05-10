@@ -9,37 +9,6 @@ let server;
 lab.experiment('campaigns', async() => {
   lab.beforeEach(async () => {
     server = new hapi.Server({ port: 8000 });
-    await server.register({
-      plugin: hapiCampaigns,
-      options: {
-        cookieName: 'gingersnap'
-      }
-    });
-    await server.start();
-  });
-
-  lab.afterEach(async () => {
-    await server.stop();
-  });
-
-  lab.test('option to set the cookieName', async() => {
-    server.route({
-      path: '/somecampaign',
-      method: 'get',
-      handler(request, h) {
-        return { f: 'true' };
-      }
-    });
-
-    const { res } = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname', { json: 'force' });
-    const cookie = res.headers['set-cookie'][0];
-    code.expect(cookie).to.include('gingersnap');
-  });
-});
-
-lab.experiment('campaigns', async() => {
-  lab.beforeEach(async () => {
-    server = new hapi.Server({ port: 8000 });
     await server.register(hapiCampaigns);
     await server.start();
   });
@@ -63,6 +32,7 @@ lab.experiment('campaigns', async() => {
   });
 
   lab.test('setting campaign with no type', async() => {
+    const parseCookie = require('../lib/parseCookie');
     server.route({
       path: '/somecampaign',
       method: 'get',
@@ -70,10 +40,14 @@ lab.experiment('campaigns', async() => {
         return { cookie: request.getCampaigns() };
       }
     });
-
-    const { res } = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force' });
+    const { res, payload } = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force' });
     const cookie = res.headers['set-cookie'][0];
-    code.expect(cookie).to.include('testname');
+    const parsed = parseCookie(cookie);
+    code.expect(parsed[0].name).to.equal('campaigns=testname');
+    code.expect(parsed[0].type).to.equal('');
+    const result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force', headers: { cookie: `campaigns=testname||${Date.now()}` } });
+    code.expect(result.payload.cookie[0].name).to.equal('testname');
+    code.expect(result.payload.cookie[0].type).to.equal('');
   });
 
   lab.test('sets cookie', async() => {
@@ -151,22 +125,6 @@ lab.experiment('campaigns', async() => {
     code.expect(cookie[0].timestamp).to.exist();
   });
 
-  lab.test('setting campaign names with "/" and "|" characters', async() => {
-    server.route({
-      path: '/somecampaign',
-      method: 'get',
-      handler(request, h) {
-        return { cookie: request.getCampaigns() };
-      }
-    });
-    const result1 = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_test/name1', { json: 'force' });
-    const result2 = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_test|name2', { json: 'force' });
-    const cookie1 = result1.res.headers['set-cookie'][0];
-    const cookie2 = result2.res.headers['set-cookie'][0];
-    code.expect(cookie1.split(';')[0]).to.startWith('campaigns=test/name1|visit|');
-    code.expect(cookie2.split(';')[0]).to.startWith('campaigns=test|name2|visit|');
-  });
-
   lab.test('handles when no cookie set', async() => {
     server.route({
       path: '/somecampaign',
@@ -241,5 +199,21 @@ lab.experiment('campaigns', async() => {
     await wreck.get('http://localhost:8000/somecampaign2?campaign=visit_testname', { json: 'force' });
     await new Promise(resolve => setTimeout(resolve, 1500));
     code.expect(called.name).to.equal('testname');
+  });
+
+  lab.test('setting campaign names with "/" and "|" characters', async() => {
+    server.route({
+      path: '/somecampaign',
+      method: 'get',
+      handler(request, h) {
+        return { cookie: request.getCampaigns() };
+      }
+    });
+    const output1 = await wreck.get('http://localhost:8000/somecampaign', { json: 'force', headers: { cookie: `campaigns=test/name1|visit|${Date.now()}` } });
+    const output2 = await wreck.get('http://localhost:8000/somecampaign', { json: 'force', headers: { cookie: `campaigns=test|name2|visit|${Date.now()}` } });
+    code.expect(output1.payload.cookie[0].name).to.equal('test/name1');
+    code.expect(output2.payload.cookie[0].name).to.equal('test|name2');
+    code.expect(output1.payload.cookie[0].type).to.equal('visit');
+    code.expect(output2.payload.cookie[0].type).to.equal('visit');
   });
 });
