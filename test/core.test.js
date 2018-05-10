@@ -36,7 +36,7 @@ lab.experiment('campaigns', async() => {
     code.expect(cookie).to.include('gingersnap');
   });
 });
-/*
+
 lab.experiment('campaigns', async() => {
   lab.beforeEach(async () => {
     server = new hapi.Server({ port: 8000 });
@@ -243,4 +243,3 @@ lab.experiment('campaigns', async() => {
     code.expect(called.name).to.equal('testname');
   });
 });
-*/
