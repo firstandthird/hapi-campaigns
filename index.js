@@ -7,20 +7,22 @@ const defaults = {
 };
 
 const register = function(server, options) {
-  const settings = Object.assign({}, options, defaults);
-
+  const settings = Object.assign({}, defaults, options);
+  server.event('campaign');
   const parseCampaign = (request) => {
-    const [name, type] = request.query.campaign.split('_');
-
-    if (!name || !type) {
-      return false;
+    let name = false;
+    let type = '';
+    if (request.query.campaign.indexOf('_') === -1) {
+      name = request.query.campaign;
+    } else {
+      [type, name] = request.query.campaign.split('_');
     }
-    return { name, type };
+    return name ? { name, type } : false;
   };
 
   const parseUTM = (request) => {
     const name = request.query.utm_campaign;
-    const type = request.query.utm_source;
+    const type = request.query.utm_medium ? `${request.query.utm_source}_${request.query.utm_medium}` : request.query.utm_source;
     return { name, type };
   };
 
@@ -37,25 +39,24 @@ const register = function(server, options) {
     }
     const name = res.name;
     const type = res.type;
-
     const now = Date.now();
     const cutoff = now - settings.ttl;
     const currentCookie = request.state[settings.cookieName] || '';
     const campaigns = parseCookie(currentCookie).filter(c => c.timestamp >= cutoff);
     const existing = campaigns.findIndex(c => (c.name === name && c.type === type));
-
     if (existing !== -1) {
       campaigns[existing].timestamp = now;
     } else {
       campaigns.push({ name, type, timestamp: now });
     }
-
+    server.events.emit('campaign', { request, campaigns, campaign: { name, type } });
     h.state(settings.cookieName, prepareCookie(campaigns), {
       ttl: settings.ttl,
       path: '/',
       clearInvalid: true,
       ignoreErrors: true
     });
+
     return h.continue;
   });
 
