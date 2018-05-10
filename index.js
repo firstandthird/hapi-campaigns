@@ -26,7 +26,7 @@ const register = function(server, options) {
     return { name, type };
   };
 
-  server.ext('onPreResponse', async (request, h) => {
+  server.ext('onPreResponse', (request, h) => {
     let res;
     if (request.query.campaign) {
       res = parseCampaign(request);
