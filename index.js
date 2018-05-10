@@ -7,7 +7,7 @@ const defaults = {
 };
 
 const register = function(server, options) {
-  const settings = Object.assign({}, options, defaults);
+  const settings = Object.assign({}, defaults, options);
   server.event('campaign');
   const parseCampaign = (request) => {
     let name = false;

@@ -9,6 +9,37 @@ let server;
 lab.experiment('campaigns', async() => {
   lab.beforeEach(async () => {
     server = new hapi.Server({ port: 8000 });
+    await server.register({
+      plugin: hapiCampaigns,
+      options: {
+        cookieName: 'gingersnap'
+      }
+    });
+    await server.start();
+  });
+
+  lab.afterEach(async () => {
+    await server.stop();
+  });
+
+  lab.test('option to set the cookieName', async() => {
+    server.route({
+      path: '/somecampaign',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+
+    const { res } = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname', { json: 'force' });
+    const cookie = res.headers['set-cookie'][0];
+    code.expect(cookie).to.include('gingersnap');
+  });
+});
+/*
+lab.experiment('campaigns', async() => {
+  lab.beforeEach(async () => {
+    server = new hapi.Server({ port: 8000 });
     await server.register(hapiCampaigns);
     await server.start();
   });
@@ -212,3 +243,4 @@ lab.experiment('campaigns', async() => {
     code.expect(called.name).to.equal('testname');
   });
 });
+*/
