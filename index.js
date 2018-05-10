@@ -49,7 +49,7 @@ const register = function(server, options) {
     } else {
       campaigns.push({ name, type, timestamp: now });
     }
-    await server.events.emit('campaign', { request, campaigns, campaign: { name, type } });
+    server.events.emit('campaign', { request, campaigns, campaign: { name, type } });
     h.state(settings.cookieName, prepareCookie(campaigns), {
       ttl: settings.ttl,
       path: '/',
