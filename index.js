@@ -49,13 +49,13 @@ const register = function(server, options) {
     } else {
       campaigns.push({ name, type, timestamp: now });
     }
-    server.events.emit('campaign', { request, campaigns, campaign: { name, type } });
     h.state(settings.cookieName, prepareCookie(campaigns), {
       ttl: settings.ttl,
       path: '/',
       clearInvalid: true,
       ignoreErrors: true
     });
+    server.events.emit('campaign', { request, campaigns, campaign: { name, type, timestamp: now } });
 
     return h.continue;
   });
