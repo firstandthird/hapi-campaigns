@@ -28,6 +28,11 @@ const register = function(server, options) {
 
   server.ext('onPreResponse', (request, h) => {
     let res;
+    // if state was not set up then this probably means we are being redirected
+    // from http -> https and don't need to respond yet:
+    if (!request.state) {
+      return h.continue;
+    }
     if (request.query.campaign) {
       res = parseCampaign(request);
     }

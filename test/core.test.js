@@ -216,4 +216,17 @@ lab.experiment('campaigns', async() => {
     code.expect(output1.payload.cookie[0].type).to.equal('visit');
     code.expect(output2.payload.cookie[0].type).to.equal('visit');
   });
+
+  lab.test('does not crash if request.state is not set', async() => {
+    server.route({
+      path: '/somecampaign',
+      method: 'get',
+      handler(request, h) {
+        delete request.state;
+        return h.redirect('/somewhere');
+      }
+    });
+    const { res } = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname');
+    code.expect(res.statusCode).to.equal(302);
+  });
 });
