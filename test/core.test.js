@@ -184,6 +184,19 @@ lab.experiment('campaigns', async() => {
     code.expect(cookie[0]).to.include('visit_video');
   });
 
+  lab.test('does not crash if a cookie violates RFC 6265 (eg includes whitespace)', async() => {
+    server.route({
+      path: '/somecampaign',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const { res } = await wreck.get('http://localhost:8000/somecampaign?utm_campaign=schedule&utm_source=random_page&utm_medium=Arbitrary%20Whitespace%20Cookie', { json: 'force' });
+    const cookie = res.headers['set-cookie'] || [];
+    code.expect(cookie.length).to.equal(1);
+  });
+
   lab.test('emits campaign event when campaign is fetched', async() => {
     let called = false;
     server.events.on('campaign', (data) => {
