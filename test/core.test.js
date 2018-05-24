@@ -43,9 +43,9 @@ lab.experiment('campaigns', async() => {
     const { res, payload } = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force' });
     const cookie = res.headers['set-cookie'][0];
     const parsed = parseCookie(cookie);
-    const term = `campaigns=${Buffer.from('testname').toString('base64')}`;
+    const term = `campaigns64=${Buffer.from('testname').toString('base64')}`;
     code.expect(parsed[0].name).to.include(term.substring(0, term.length - 2));
-    const result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force', headers: { cookie: `campaigns=testname||${Date.now()}` } });
+    const result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force', headers: { cookie: `campaigns64=testname||${Date.now()}` } });
     code.expect(result.payload.cookie[0].name).to.equal('testname');
     code.expect(result.payload.cookie[0].type).to.equal('');
   });
@@ -61,7 +61,7 @@ lab.experiment('campaigns', async() => {
 
     const { res, payload } = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname', { json: 'force' });
     const cookie = res.headers['set-cookie'][0];
-    const term = `campaigns=${Buffer.from('testname').toString('base64')}`;
+    const term = `campaigns64=${Buffer.from('testname').toString('base64')}`;
     code.expect(cookie.indexOf(term.substring(0, term.length - 2))).not.equal(-1);
     code.expect(payload.f).to.equal('true');
   });
@@ -78,7 +78,7 @@ lab.experiment('campaigns', async() => {
     let result;
 
     result = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname', { json: 'force' });
-    result = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname', { json: 'force', headers: { cookie: `campaigns=testname|visit|${Date.now()}` } });
+    result = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname', { json: 'force', headers: { cookie: `campaigns64=testname|visit|${Date.now()}` } });
     code.expect(result.payload.cookie.length).to.equal(1);
   });
 
@@ -102,10 +102,10 @@ lab.experiment('campaigns', async() => {
     let result;
 
     result = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname', { json: 'force' });
-    result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname2_visit', { json: 'force', headers: { cookie: `campaigns=testname|visit|${Date.now()}` } });
-    result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname3_visit', { json: 'force', headers: { cookie: `campaigns=testname|visit|${Date.now()}/campaigns=testname2|visit|${Date.now()}` } });
-    result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname4_visit', { json: 'force', headers: { cookie: `campaigns=testname|visit|${Date.now()}/campaigns=testname2|visit|${Date.now()}/campaigns=testname3|visit|${Date.now()}` } });
-    result = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns=testname|visit|${Date.now()}/campaigns=testname2|visit|${Date.now()}/campaigns=testname3|visit|${Date.now()}` } });
+    result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname2_visit', { json: 'force', headers: { cookie: `campaigns64=testname|visit|${Date.now()}` } });
+    result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname3_visit', { json: 'force', headers: { cookie: `campaigns64=testname|visit|${Date.now()}/campaigns64=testname2|visit|${Date.now()}` } });
+    result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname4_visit', { json: 'force', headers: { cookie: `campaigns64=testname|visit|${Date.now()}/campaigns64=testname2|visit|${Date.now()}/campaigns64=testname3|visit|${Date.now()}` } });
+    result = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns64=testname|visit|${Date.now()}/campaigns64=testname2|visit|${Date.now()}/campaigns64=testname3|visit|${Date.now()}` } });
     code.expect(result.payload.cookie.length).to.equal(3);
   });
 
@@ -118,7 +118,7 @@ lab.experiment('campaigns', async() => {
       }
     });
 
-    const { payload } = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns=testname|visit|${Date.now()}` } });
+    const { payload } = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns64=testname|visit|${Date.now()}` } });
     const cookie = payload.cookie;
     code.expect(cookie.length).to.equal(1);
     code.expect(cookie[0].name).to.equal('testname');
@@ -151,7 +151,7 @@ lab.experiment('campaigns', async() => {
 
     const expired = Date.now() - (31 * 86400000);
 
-    const result = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns=testname|visit|${Date.now()}/campaigns=testname2|visit|${expired}` } });
+    const result = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns64=testname|visit|${Date.now()}/campaigns64=testname2|visit|${expired}` } });
     code.expect(result.payload.cookie.length).to.equal(1);
   });
 
@@ -166,7 +166,7 @@ lab.experiment('campaigns', async() => {
     const { res } = await wreck.get('http://localhost:8000/somecampaign?utm_campaign=testname&utm_source=visit', { json: 'force' });
     const cookie = res.headers['set-cookie'] || [];
     code.expect(cookie.length).to.equal(1);
-    const term = `campaigns=${Buffer.from('testname').toString('base64')}`;
+    const term = `campaigns64=${Buffer.from('testname').toString('base64')}`;
     code.expect(cookie[0]).to.include(term.substring(0, term.length - 2));
     const term2 = Buffer.from('visit').toString('base64');
     code.expect(cookie[0]).to.include(term2.substring(0, term2.length - 2));
@@ -227,8 +227,8 @@ lab.experiment('campaigns', async() => {
         return { cookie: request.getCampaigns() };
       }
     });
-    const output1 = await wreck.get('http://localhost:8000/somecampaign', { json: 'force', headers: { cookie: `campaigns=test/name1|visit|${Date.now()}` } });
-    const output2 = await wreck.get('http://localhost:8000/somecampaign', { json: 'force', headers: { cookie: `campaigns=test|name2|visit|${Date.now()}` } });
+    const output1 = await wreck.get('http://localhost:8000/somecampaign', { json: 'force', headers: { cookie: `campaigns64=test/name1|visit|${Date.now()}` } });
+    const output2 = await wreck.get('http://localhost:8000/somecampaign', { json: 'force', headers: { cookie: `campaigns64=test|name2|visit|${Date.now()}` } });
     code.expect(output1.payload.cookie[0].name).to.equal('test/name1');
     code.expect(output2.payload.cookie[0].name).to.equal('test|name2');
     code.expect(output1.payload.cookie[0].type).to.equal('visit');

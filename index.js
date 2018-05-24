@@ -2,7 +2,7 @@ const parseCookie = require('./lib/parseCookie');
 const prepareCookie = require('./lib/prepareCookie');
 
 const defaults = {
-  cookieName: 'campaigns',
+  cookieName: 'campaigns64',
   ttl: 30 * 86400000 // 30 days
 };
 
