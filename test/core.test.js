@@ -43,8 +43,8 @@ lab.experiment('campaigns', async() => {
     const { res, payload } = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force' });
     const cookie = res.headers['set-cookie'][0];
     const parsed = parseCookie(cookie);
-    code.expect(parsed[0].name).to.equal('campaigns=testname');
-    code.expect(parsed[0].type).to.equal('');
+    const term = `campaigns=${Buffer.from('testname').toString('base64')}`;
+    code.expect(parsed[0].name).to.include(term.substring(0, term.length - 2));
     const result = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force', headers: { cookie: `campaigns=testname||${Date.now()}` } });
     code.expect(result.payload.cookie[0].name).to.equal('testname');
     code.expect(result.payload.cookie[0].type).to.equal('');
@@ -61,7 +61,8 @@ lab.experiment('campaigns', async() => {
 
     const { res, payload } = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname', { json: 'force' });
     const cookie = res.headers['set-cookie'][0];
-    code.expect(cookie.indexOf('testname')).not.equal(-1);
+    const term = `campaigns=${Buffer.from('testname').toString('base64')}`;
+    code.expect(cookie.indexOf(term.substring(0, term.length - 2))).not.equal(-1);
     code.expect(payload.f).to.equal('true');
   });
 
@@ -165,8 +166,10 @@ lab.experiment('campaigns', async() => {
     const { res } = await wreck.get('http://localhost:8000/somecampaign?utm_campaign=testname&utm_source=visit', { json: 'force' });
     const cookie = res.headers['set-cookie'] || [];
     code.expect(cookie.length).to.equal(1);
-    code.expect(cookie[0]).to.include('testname');
-    code.expect(cookie[0]).to.include('visit');
+    const term = `campaigns=${Buffer.from('testname').toString('base64')}`;
+    code.expect(cookie[0]).to.include(term.substring(0, term.length - 2));
+    const term2 = Buffer.from('visit').toString('base64');
+    code.expect(cookie[0]).to.include(term2.substring(0, term2.length - 2));
   });
 
   lab.test('concats utm_medium with utm_source', async() => {
@@ -180,8 +183,10 @@ lab.experiment('campaigns', async() => {
     const { res } = await wreck.get('http://localhost:8000/somecampaign?utm_campaign=testname&utm_source=visit&utm_medium=video', { json: 'force' });
     let cookie = res.headers['set-cookie'] || [];
     code.expect(cookie.length).to.equal(1);
-    code.expect(cookie[0]).to.include('testname');
-    code.expect(cookie[0]).to.include('visit_video');
+    const term = Buffer.from('testname').toString('base64');
+    code.expect(cookie[0]).to.include(term.substring(0, term.length - 2));
+    const term2 = Buffer.from('visit_video').toString('base64');
+    code.expect(cookie[0]).to.include(term2.substring(0, term2.length - 2));
   });
 
   lab.test('does not crash if a cookie violates RFC 6265 (eg includes whitespace)', async() => {

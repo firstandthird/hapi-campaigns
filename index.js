@@ -59,7 +59,7 @@ const register = function(server, options) {
       path: '/',
       clearInvalid: true,
       ignoreErrors: true,
-      strictHeader: false
+      encoding: 'base64'
     });
     server.events.emit('campaign', { request, campaigns, campaign: { name, type, timestamp: now } });
 
