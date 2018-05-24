@@ -58,7 +58,8 @@ const register = function(server, options) {
       ttl: settings.ttl,
       path: '/',
       clearInvalid: true,
-      ignoreErrors: true
+      ignoreErrors: true,
+      encoding: 'base64'
     });
     server.events.emit('campaign', { request, campaigns, campaign: { name, type, timestamp: now } });
 
