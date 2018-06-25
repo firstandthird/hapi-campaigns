@@ -39,15 +39,20 @@ const register = function(server, options) {
     if (request.query.utm_campaign && request.query.utm_source) {
       res = parseUTM(request);
     }
-    if (!res) {
-      return h.continue;
-    }
-    const name = res.name;
-    const type = res.type;
     const now = Date.now();
     const cutoff = now - settings.ttl;
     const currentCookie = request.state[settings.cookieName] || '';
     const campaigns = parseCookie(currentCookie).filter(c => c.timestamp >= cutoff);
+    // if there was no campaign query don't set anything:
+    if (!res) {
+      // if there was a campaigns cookie go ahead and call the event:
+      if (campaigns && campaigns.length) {
+        server.events.emit('campaign', { request, campaign: campaigns });
+      }
+      return h.continue;
+    }
+    const name = res.name;
+    const type = res.type;
     const existing = campaigns.findIndex(c => (c.name === name && c.type === type));
     if (existing !== -1) {
       campaigns[existing].timestamp = now;
@@ -61,8 +66,7 @@ const register = function(server, options) {
       ignoreErrors: true,
       encoding: 'base64'
     });
-    server.events.emit('campaign', { request, campaigns, campaign: { name, type, timestamp: now } });
-
+    server.events.emit('campaign', { request, campaign: { name, type, timestamp: now } });
     return h.continue;
   });
 
