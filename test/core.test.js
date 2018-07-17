@@ -40,7 +40,7 @@ lab.experiment('campaigns', async() => {
         return { cookie: request.getCampaigns() };
       }
     });
-    const { res, payload } = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force' });
+    const { res } = await wreck.get('http://localhost:8000/somecampaign?campaign=testname', { json: 'force' });
     const cookie = res.headers['set-cookie'][0].split(';')[0].split('=')[1];
     const parsed = parseCookie(cookie);
     code.expect(parsed[0].name).to.equal('testname');
@@ -153,7 +153,7 @@ lab.experiment('campaigns', async() => {
 
     const expired = Date.now() - (31 * 86400000);
     const term = Buffer.from(`testname3|visit|${Date.now()}`).toString('base64');
-    const expiredTerm =  Buffer.from(`testname2|visit|${expired}`).toString('base64');
+    const expiredTerm = Buffer.from(`testname2|visit|${expired}`).toString('base64');
 
     const result = await wreck.get('http://localhost:8000/somecampaign2', { json: 'force', headers: { cookie: `campaigns64=${term}/campaigns64=${expiredTerm}` } });
     code.expect(result.payload.cookie.length).to.equal(1);
@@ -185,7 +185,7 @@ lab.experiment('campaigns', async() => {
       }
     });
     const { res } = await wreck.get('http://localhost:8000/somecampaign?utm_campaign=testname&utm_source=visit&utm_medium=video', { json: 'force' });
-    let cookie = res.headers['set-cookie'] || [];
+    const cookie = res.headers['set-cookie'] || [];
     code.expect(cookie.length).to.equal(1);
     const term = Buffer.from('testname').toString('base64');
     code.expect(cookie[0]).to.include(term.substring(0, term.length - 2));
@@ -252,5 +252,30 @@ lab.experiment('campaigns', async() => {
     });
     const { res } = await wreck.get('http://localhost:8000/somecampaign?campaign=visit_testname');
     code.expect(res.statusCode).to.equal(302);
+  });
+
+  lab.test('manually set campaign', async() => {
+    server.route({
+      path: '/manual',
+      method: 'get',
+      handler(request, h) {
+        request.query = Object.assign(request.query, {
+          utm_campaign: 'testname',
+          utm_source: 'visit',
+          utm_medium: 'video'
+        });
+
+        request.setCampaigns(request, h);
+
+        return { status: 'ok' };
+      }
+    });
+    const { res } = await wreck.get('http://localhost:8000/manual', { json: 'force' });
+    const cookie = res.headers['set-cookie'] || [];
+    code.expect(cookie.length).to.equal(1);
+    const term = Buffer.from('testname').toString('base64');
+    code.expect(cookie[0]).to.include(term.substring(0, term.length - 2));
+    const term2 = Buffer.from('visit_video').toString('base64');
+    code.expect(cookie[0]).to.include(term2.substring(0, term2.length - 2));
   });
 });

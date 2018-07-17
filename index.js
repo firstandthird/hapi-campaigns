@@ -26,31 +26,36 @@ const register = function(server, options) {
     return { name, type };
   };
 
-  server.ext('onPreResponse', (request, h) => {
-    let res;
+  const setCampaigns = (request, h) => {
     // if state was not set up then this probably means we are being redirected
     // from http -> https and don't need to respond yet:
     if (!request.state) {
-      return h.continue;
+      return;
     }
+
+    let res;
     if (request.query.campaign) {
       res = parseCampaign(request);
     }
     if (request.query.utm_campaign && request.query.utm_source) {
       res = parseUTM(request);
     }
+
     const now = Date.now();
     const cutoff = now - settings.ttl;
     const currentCookie = request.state[settings.cookieName] || '';
     const campaigns = parseCookie(currentCookie).filter(c => c.timestamp >= cutoff);
+
     // if there was no campaign query don't set anything:
     if (!res) {
       // if there was a campaigns cookie go ahead and call the event:
       if (campaigns && campaigns.length) {
         server.events.emit('campaign', { request, campaign: campaigns });
       }
-      return h.continue;
+
+      return;
     }
+
     const name = res.name;
     const type = res.type;
     const existing = campaigns.findIndex(c => (c.name === name && c.type === type));
@@ -67,8 +72,7 @@ const register = function(server, options) {
       encoding: 'base64'
     });
     server.events.emit('campaign', { request, campaign: { name, type, timestamp: now } });
-    return h.continue;
-  });
+  };
 
   const getCampaigns = function() {
     const now = Date.now();
@@ -77,7 +81,14 @@ const register = function(server, options) {
     return parseCookie(currentCookie).filter(c => c.timestamp >= cutoff);
   };
 
+  server.ext('onPreResponse', (request, h) => {
+    setCampaigns(request, h);
+
+    return h.continue;
+  });
+
   server.decorate('request', 'getCampaigns', getCampaigns);
+  server.decorate('request', 'setCampaigns', setCampaigns);
 };
 
 exports.plugin = {
