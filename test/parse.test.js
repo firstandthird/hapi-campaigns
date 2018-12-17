@@ -41,4 +41,10 @@ lab.experiment('campaigns', () => {
     code.expect(outcome4[2].name).to.equal('tes|tname/3');
     code.expect(outcome4[3].name).to.equal('test/name4');
   });
+
+  lab.test('handle invalid cookie value', async() => {
+    const outcome = parseCookie({ something: 1 });
+
+    code.expect(outcome.length).to.equal(0);
+  });
 });
