@@ -3,6 +3,13 @@ const prepareCookie = require('./lib/prepareCookie');
 
 const defaults = {
   cookieName: 'campaigns64',
+  cookie: {
+    isSecure: false,
+    isSameSite: false,
+    isHttpOnly: true,
+    clearInvalid: true,
+    ignoreErrors: true
+  },
   ttl: 30 * 86400000 // 30 days
 };
 
@@ -67,8 +74,11 @@ const register = function(server, options) {
     h.state(settings.cookieName, prepareCookie(campaigns), {
       ttl: settings.ttl,
       path: '/',
-      clearInvalid: true,
-      ignoreErrors: true,
+      isSecure: settings.cookie.isSecure,
+      isSameSite: settings.cookie.isSameSite,
+      isHttpOnly: settings.cookie.isHttpOnly,
+      clearInvalid: settings.cookie.clearInvalid,
+      ignoreErrors: settings.cookie.ignoreErrors,
       encoding: 'base64'
     });
     server.events.emit('campaign', { request, campaign: { name, type, timestamp: now } });
