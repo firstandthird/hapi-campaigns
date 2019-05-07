@@ -27,7 +27,13 @@
     }
   },
   "devDependencies": {
-    "hapi": "^17.0.2"
+    "code": "^5.2.4",
+    "eslint": "^5.16.0",
+    "eslint-config-firstandthird": "^4.3.0",
+    "eslint-plugin-import": "^2.17.2",
+    "hapi": "^18.1.0",
+    "lab": "^18.0.2",
+    "wreck": "^14.2.0"
   },
   "author": "First+Third",
   "license": "MIT",
@@ -35,12 +41,5 @@
     "url": "https://github.com/firstandthird/hapi-campaigns/issues"
   },
   "homepage": "https://github.com/firstandthird/hapi-campaigns#readme",
-  "dependencies": {
-    "code": "^5.2.4",
-    "eslint": "^5.16.0",
-    "eslint-config-firstandthird": "^4.3.0",
-    "eslint-plugin-import": "^2.17.2",
-    "lab": "^18.0.2",
-    "wreck": "^14.2.0"
-  }
+  "dependencies": {}
 }
