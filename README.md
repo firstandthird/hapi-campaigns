@@ -44,13 +44,13 @@ server will print:
 The cookie associated with your campaign, default value is _campaigns64_
 - __cookie__
 
+- __ttl__
+
+The TTL for the cookie, by default the cookie will last 30 days.
+
 A JSON object specifying the cookie's properties, these along with their defaults are:
   - __isSecure__: false
   - __isSameSite__: false
   - __isHttpOnly__: true
   - __clearInvalid__: true
   - __ignoreErrors__: true
-}
-- __ttl__
-
- The TTL for the cookie, by default the cookie will last 30 days.
